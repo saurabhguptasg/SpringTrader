@@ -78,7 +78,7 @@ public class WebConfig extends WebMvcConfigurationSupport {
 		customResolver.setExceptionHandler(new GlobalExceptionHandler());
 		customResolver.setMessageConverters(getMessageConverters());
 		customResolver.afterPropertiesSet();
-		exceptionResolvers.add(customResolver);
-	}
-*/
+				exceptionResolvers.add(customResolver);
+					}
+	*/
 }
