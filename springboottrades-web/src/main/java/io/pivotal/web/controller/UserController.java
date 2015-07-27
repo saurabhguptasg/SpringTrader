@@ -13,6 +13,8 @@ import io.pivotal.web.service.MarketService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,6 +29,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
+@RefreshScope
 public class UserController {
 	private static final Logger logger = LoggerFactory
 			.getLogger(UserController.class);
@@ -36,6 +39,9 @@ public class UserController {
 		
 	@Autowired
 	private MarketService marketService;
+
+  @Value("${company}")
+  private String companyName;
 	
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String showHome(Model model) {
@@ -43,6 +49,7 @@ public class UserController {
 			model.addAttribute("login", new AuthenticationRequest());
 		}
 		model.addAttribute("marketSummary", marketService.getMarketSummary());
+    model.addAttribute("companyName", companyName);
 		
 		//check if user is logged in!
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

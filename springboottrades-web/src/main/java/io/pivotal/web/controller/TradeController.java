@@ -8,15 +8,14 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
-import io.pivotal.web.domain.CompanyInfo;
-import io.pivotal.web.domain.Order;
-import io.pivotal.web.domain.Quote;
-import io.pivotal.web.domain.Search;
+import io.pivotal.web.domain.*;
 import io.pivotal.web.service.MarketService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,6 +29,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
+@RefreshScope
 public class TradeController {
 
 	private static final Logger logger = LoggerFactory
@@ -37,6 +37,9 @@ public class TradeController {
 	
 	@Autowired
 	private MarketService marketService;
+
+  @Value("${latency}")
+  Boolean latency;
 	
 	@RequestMapping(value = "/trade", method = RequestMethod.GET)
 	public String showTrade(Model model) {
@@ -63,7 +66,6 @@ public class TradeController {
 	@RequestMapping(value = "/trade", method = RequestMethod.POST)
 	public String showTrade(Model model, @ModelAttribute("search") Search search) {
 		logger.debug("/trade.POST - symbol: " + search.getName());
-		
 		//model.addAttribute("marketSummary", marketService.getMarketSummary());
 		model.addAttribute("search", search);
 		
@@ -116,8 +118,8 @@ public class TradeController {
 				}
 		return "trade";
 	}
-	
-	
+
+
 	private List<Quote> getQuotes(String companyName) {
 		logger.debug("Fetching quotes for companies that have: " + companyName + " in name or symbol");
 		List<CompanyInfo> companies = marketService.getCompanies(companyName);

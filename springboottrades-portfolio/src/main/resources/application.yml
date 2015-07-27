@@ -1,7 +1,9 @@
 spring:
-  profiles.active: local
   application:
      name: portfolio
+  jpa:
+     hibernate:
+        ddl-auto: update
 eureka:
   client:
     serviceUrl:

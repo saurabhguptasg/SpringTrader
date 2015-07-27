@@ -3,6 +3,7 @@ package io.pivotal.web.controller;
 import javax.servlet.http.HttpServletRequest;
 
 import io.pivotal.web.domain.Order;
+import io.pivotal.web.domain.PortfolioValue;
 import io.pivotal.web.domain.Search;
 import io.pivotal.web.service.MarketService;
 
@@ -15,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.client.HttpServerErrorException;
@@ -49,6 +51,14 @@ public class PortfolioController {
 		}
 		
 		return "portfolio";
+	}
+
+	@RequestMapping(value = "/calc/{id}", method = RequestMethod.GET)
+	public PortfolioValue calculate(@PathVariable("id")String accountId) {
+		if (accountId != null) {
+			return marketService.getPortfolioValue(accountId);
+		}
+		return new PortfolioValue();
 	}
 
 	@ExceptionHandler({ Exception.class })

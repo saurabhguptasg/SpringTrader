@@ -1,7 +1,3 @@
-spring:
-  profiles.active: local
-  application:
-     name: webUI
 eureka:
   client:
     registerWithEureka: false
@@ -12,6 +8,14 @@ eureka:
     hostname: ${vcap.application.uris[0]:localhost} 
     metadataMap:
       instanceId: ${vcap.application.instance_id:${spring.application.name}:${spring.application.instance_id:${server.port}}}
+hystrix:
+  command:
+    getQuote:
+      execution.isolation.thread.timeoutInMilliseconds: 2000
+    getCompanies:
+      execution.isolation.thread.timeoutInMilliseconds: 2000
+    getPortfolioValue:
+      execution.isolation.thread.timeoutInMilliseconds: 500
 ---
 spring:
   profiles: local
@@ -32,7 +36,9 @@ spring:
 eureka:
   instance:
     nonSecurePort: 80
----        
+
+
+---
 logging:
   level:
      io:

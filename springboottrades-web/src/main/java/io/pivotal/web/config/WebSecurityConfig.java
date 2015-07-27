@@ -29,7 +29,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
             .authorizeRequests()
-                .antMatchers("/", "/registration").permitAll()
+                .antMatchers("/", "/registration", "/calc/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
             .formLogin()
@@ -45,6 +45,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) throws Exception {
         web
                 .ignoring()
+                .antMatchers("/calc/**")
                 .antMatchers("/webjars/**")
                 .antMatchers("/images/**").antMatchers("/css/**").antMatchers("/js/**");
     }

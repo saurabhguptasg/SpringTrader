@@ -2,6 +2,7 @@ package io.pivotal.portfolio.controller;
 
 import io.pivotal.portfolio.domain.Order;
 import io.pivotal.portfolio.domain.Portfolio;
+import io.pivotal.portfolio.domain.PortfolioValue;
 import io.pivotal.portfolio.service.PortfolioService;
 
 import org.slf4j.Logger;
@@ -30,6 +31,8 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 @RestController
 public class PortfolioController {
+  final Object lock = new Object();
+
 	private static final Logger logger = LoggerFactory
 			.getLogger(PortfolioController.class);
 
@@ -50,6 +53,33 @@ public class PortfolioController {
 		Portfolio folio = service.getPortfolio(accountId);
 		logger.debug("PortfolioController: Retrieved portfolio:" + folio);
 		return new ResponseEntity<Portfolio>(folio, getNoCacheHeaders(), HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/calc/{id}", method = RequestMethod.GET)
+	public ResponseEntity<PortfolioValue> getPortfolioValue(@PathVariable("id") final String accountId) {
+		logger.debug("PortfolioController: Retrieving portfolio with user id:" + accountId);
+		Portfolio folio = service.getPortfolio(accountId);
+		folio.refreshTotalValue();
+		PortfolioValue portfolioValue = new PortfolioValue();
+		portfolioValue.setAccountId(accountId);
+		portfolioValue.setName(folio.getName());
+		portfolioValue.setCurrentTotalValue(folio.getCurrentTotalValue());
+		portfolioValue.setPurchaseValue(folio.getPurchaseValue());
+		portfolioValue.setSellValue(folio.getSellValue());
+		portfolioValue.derive();
+
+    synchronized (lock) {
+      try {
+        lock.wait(5000);
+      }
+      catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
+
+
+		logger.debug("PortfolioController: Retrieved portfolio:" + folio);
+		return new ResponseEntity<>(portfolioValue, getNoCacheHeaders(), HttpStatus.OK);
 	}
 	
 	private HttpHeaders getNoCacheHeaders() {

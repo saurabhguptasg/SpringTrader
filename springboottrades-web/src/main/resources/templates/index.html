@@ -24,6 +24,16 @@
 		<div sec:authorize="isAnonymous()">
 			<div th:include="fragments/login_fragment :: login"></div>
 		</div>
+		<table width="100%">
+            <tr>
+                <td>Super Awesome Version Copyright <div th:text="${companyName}"></div></td>
+                <td>
+                    <form action="#" th:action="@{/refresh}" method="post" class="form-inline">
+                        <button id=" refreshBtn" class="btn btn-inverse">Refresh Config</button>
+                    </form>
+                </td>
+            </tr>
+        </table>
 	</div>
 
 

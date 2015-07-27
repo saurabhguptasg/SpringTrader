@@ -1,23 +1,18 @@
 package io.pivotal.web.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import io.pivotal.web.domain.CompanyInfo;
-import io.pivotal.web.domain.MarketSummary;
-import io.pivotal.web.domain.Order;
-import io.pivotal.web.domain.Portfolio;
-import io.pivotal.web.domain.Quote;
+import io.pivotal.web.domain.*;
 import io.pivotal.web.exception.OrderNotSavedException;
 
+import io.pivotal.web.exception.PortfolioException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -29,6 +24,7 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 @Service
 @EnableScheduling
+@RefreshScope
 public class MarketService {
 	private static final Logger logger = LoggerFactory
 			.getLogger(MarketService.class);
@@ -40,8 +36,13 @@ public class MarketService {
 	@Autowired
 	@LoadBalanced
 	private RestTemplate restTemplate;
-	
-	private static List<String> symbolsIT = Arrays.asList("EMC", "ORCL", "IBM", "INTC", "AMD", "HPQ", "CSCO", "AAPL");
+
+  private final Random random = new Random();
+
+  @Value("${latency}")
+  Boolean latency;
+
+  private static List<String> symbolsIT = Arrays.asList("EMC", "ORCL", "IBM", "INTC", "AMD", "HPQ", "CSCO", "AAPL");
 	private static List<String> symbolsFS = Arrays.asList("JPM", "C", "MS", "BAC", "GS", "WFC","BK");
 	
 	private MarketSummary summary = new MarketSummary();
@@ -55,6 +56,15 @@ public class MarketService {
 	@HystrixCommand(fallbackMethod = "getQuoteFallback")
 	public Quote getQuote(String symbol) {
 		logger.debug("Fetching quote: " + symbol);
+    if(random.nextBoolean()) {
+      logger.debug("|||||||| slowing down quotes |||||||||");
+      try {
+        Thread.currentThread().wait(10000); //10 second delay
+      }
+      catch (InterruptedException e) {
+        logger.error(e.getMessage(), e);
+      }
+    }
 		Quote quote = restTemplate.getForObject("http://quotes/quote/{symbol}", Quote.class, symbol);
 		return quote;
 	}
@@ -71,12 +81,28 @@ public class MarketService {
 	public List<CompanyInfo> getCompanies(String name) {
 		logger.debug("Fetching companies with name or symbol matching: " + name);
 		CompanyInfo[] infos = restTemplate.getForObject("http://quotes/company/{name}", CompanyInfo[].class, name);
+
 		return Arrays.asList(infos);
 	}
+
 	private List<CompanyInfo> getCompaniesFallback(String name) {
 		List<CompanyInfo> infos = new ArrayList<>();
 		return infos;
 	}
+
+	@HystrixCommand(fallbackMethod = "getPortfolioValueFallback")
+	public PortfolioValue getPortfolioValue(String accountId) {
+		ResponseEntity<PortfolioValue>  result = restTemplate.getForEntity("http://portfolio/calc/{accountId}", PortfolioValue.class, accountId);
+		if (result.getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR) {
+			throw new PortfolioException("Could not get portfolio value");
+		}
+		logger.debug("portfolio value is:: " + result.getBody());
+		return result.getBody();
+	}
+
+  public PortfolioValue getPortfolioValueFallback(String accountId) {
+    return new PortfolioValue();
+  }
 	
 	
 	
@@ -92,7 +118,8 @@ public class MarketService {
 		logger.debug("Order saved:: " + result.getBody());
 		return result.getBody();
 	}
-	
+
+
 	public Portfolio getPortfolio(String accountId) {
 		Portfolio folio = restTemplate.getForObject("http://portfolio/portfolio/{accountid}", Portfolio.class, accountId);
 		logger.debug("Portfolio received: " + folio);
