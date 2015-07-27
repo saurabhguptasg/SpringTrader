@@ -51,7 +51,7 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 @Profile("test")
 public class ServiceTestConfiguration  {
-	//Holding constants
+  //Holding constants
 	public static Integer HOLDING_ID = 100;
 	public static Integer ACCOUNT_ID = 500;
 	public static BigDecimal PURCHASE_PRICE =  BigDecimal.valueOf(50000);
@@ -106,14 +106,14 @@ public class ServiceTestConfiguration  {
 	
 	//Holding Summary
 	public static BigDecimal HOLDING_SUMMARY_GAINS =   BigDecimal.valueOf(1000.54);
-	public static BigDecimal GAIN1 =   BigDecimal.valueOf(600.54);
-	public static BigDecimal GAIN2 =   BigDecimal.valueOf(400.00);
-	public static String SYMBOL2 = "OTHER";
-	public static String PAGE_LABEL = "page";
-	public static String PAGE_SIZE = "pageSize";
-	public static String TOTAL_RECORDS = "totalRecords";
-	public static Long RESULT_COUNT  = new Long(1);
-	public static String DATE = new SimpleDateFormat("yyyy-MM-dd").format(new Date(1329759342904l));
+  public static BigDecimal GAIN1 =   BigDecimal.valueOf(600.54);
+  public static BigDecimal GAIN2 =   BigDecimal.valueOf(400.00);
+  public static String SYMBOL2 = "OTHER";
+  public static String PAGE_LABEL = "page";
+  public static String PAGE_SIZE = "pageSize";
+  public static String TOTAL_RECORDS = "totalRecords";
+  public static Long RESULT_COUNT  = new Long(1);
+  public static String DATE = new SimpleDateFormat("yyyy-MM-dd").format(new Date(1329759342904l));
 	
 	
 	@Bean 
@@ -157,13 +157,13 @@ public class ServiceTestConfiguration  {
 		account.setCreditcard(CC_NUMBER);
 		account.setAuthtoken(AUTH_TOKEN);
 		return account;
-	}
-	
-	public static Map<String,Object> loginResponse() {
-		Map<String,Object> loginResponse = new HashMap<String, Object>();
-		
-		loginResponse.put("authToken", AUTH_TOKEN);
-		loginResponse.put("accountid", PROFILE_ID);
-		return loginResponse;
-	}
+  }
+
+  public static Map<String,Object> loginResponse() {
+    Map<String,Object> loginResponse = new HashMap<String, Object>();
+
+    loginResponse.put("authToken", AUTH_TOKEN);
+    loginResponse.put("accountid", PROFILE_ID);
+    return loginResponse;
+  }
 }
